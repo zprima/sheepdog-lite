@@ -93,7 +93,7 @@ body {
 		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
 <link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
 <link rel="manifest" href="index.manifest.json">
-<meta name="mobile-web-app-capable" content="yes" /><meta name="apple-mobile-web-app-capable" content="yes" /><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="mobile-web-app-capable" content="yes" /><meta name="apple-mobile-web-app-capable" content="yes" /><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" /><style>#rotate-hint{display:none;position:fixed;inset:0;z-index:9999;background:#142010;color:#f4e6c3;font-family:sans-serif;font-size:1.35rem;align-items:center;justify-content:center;text-align:center;padding:2rem;line-height:1.4}#rotate-hint span{display:block;font-size:3rem;margin-bottom:.6rem}@media screen and (orientation:portrait){#rotate-hint{display:flex;flex-direction:column}}</style><script>(function(){function lock(){var o=screen.orientation;if(o&&o.lock){o.lock('landscape').catch(function(){})}else if(screen.lockOrientation){screen.lockOrientation('landscape')}}function mount(){if(document.getElementById('rotate-hint'))return;var el=document.createElement('div');el.id='rotate-hint';el.innerHTML='<span>↻</span>Rotate your phone to play';document.body.appendChild(el);lock()}if(document.readyState==='loading'){document.addEventListener('DOMContentLoaded',mount)}else{mount()}document.addEventListener('click',lock);document.addEventListener('touchend',lock,{passive:true});window.addEventListener('orientationchange',lock)})();</script>
 	</head>
 	<body>
 		<canvas id="canvas">
@@ -112,7 +112,7 @@ body {
 
 		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":2372604,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4,"serviceWorker":"index.service.worker.js"};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":2441524,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4,"serviceWorker":"index.service.worker.js"};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 
