@@ -4,7 +4,7 @@
 // Incrementing CACHE_VERSION will kick off the install event and force
 // previously cached resources to be updated from the network.
 /** @type {string} */
-const CACHE_VERSION = '1788038137|831080';
+const CACHE_VERSION = '1788079082|793807';
 /** @type {string} */
 const CACHE_PREFIX = 'sheepdog-lite-sw-cache-';
 const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
