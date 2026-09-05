@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="utf-8">
-		<meta name="viewport" content="width=device-width, user-scalable=no, initial-scale=1.0">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 		<title>sheepdog-lite</title>
 		<style>
 html, body, #canvas {
@@ -94,11 +94,19 @@ body {
 <link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
 <link rel="manifest" href="index.manifest.json">
 <style>@font-face{font-family:Pixelify;src:url("PixelifySans-Regular.ttf") format("truetype");font-display:swap}#status{visibility:visible!important;z-index:5}#status::after{content:"Sheepdog Lite";position:absolute;top:9%;left:0;width:100%;text-align:center;z-index:2;pointer-events:none;font-family:Pixelify,sans-serif;font-size:clamp(2rem,6.5vw,3.6rem);color:#f4e6c3;text-shadow:3px 3px 0 #3a2614,-1px -1px 0 #3a2614,1px -1px 0 #3a2614,-1px 1px 0 #3a2614,1px 1px 0 #3a2614}#status-splash{image-rendering:pixelated}#status-progress::-webkit-progress-bar{background:rgba(20,32,16,.45)}#status-progress::-webkit-progress-value{background:#f4e6c3}#status-progress::-moz-progress-bar{background:#f4e6c3}</style><meta name="mobile-web-app-capable" content="yes" /><meta name="apple-mobile-web-app-capable" content="yes" /><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" /><style>#inapp-browser-banner{position:fixed;left:50%;top:max(.65rem,env(safe-area-inset-top));transform:translateX(-50%);z-index:9999;display:flex;align-items:center;gap:.65rem;padding:.5rem .55rem .5rem .8rem;background:rgba(20,32,16,.94);color:#f4e6c3;border:2px solid rgba(244,230,195,.8);border-radius:.65rem;box-shadow:0 3px 12px rgba(0,0,0,.35);font-family:sans-serif;font-size:.88rem;line-height:1.15;white-space:nowrap}#inapp-browser-banner a{display:inline-block;padding:.55rem .75rem;background:#f4e6c3;color:#142010;border-radius:.45rem;font-weight:700;text-decoration:none}</style><script>(function(){var ua=navigator.userAgent||"",android=/Android/i.test(ua),ios=/iPhone|iPad|iPod/i.test(ua),threads=/Barcelona/i.test(ua),ig=/Instagram/i.test(ua)&&!threads,inapp=/Instagram|Barcelona|FBAN|FBAV|FB_IAB|Line|Twitter|Snapchat|Bytedance|musical_ly|TikTok/i.test(ua);if(!inapp)return;function href(){var url=location.href;if(android)return "intent://"+location.host+location.pathname+location.search+location.hash+"#Intent;scheme="+location.protocol.replace(":","")+";package=com.android.chrome;S.browser_fallback_url="+encodeURIComponent(url)+";end";if(threads)return "barcelona://extbrowser/?url="+encodeURIComponent(url);if(ig)return "instagram://extbrowser/?url="+encodeURIComponent(url);if(ios)return url.replace(/^https:/,"x-safari-https:").replace(/^http:/,"x-safari-http:");return url}function mount(){if(document.getElementById("inapp-browser-banner"))return;var el=document.createElement("div");el.id="inapp-browser-banner";var label=document.createElement("span");label.textContent="In-app browser";var a=document.createElement("a");a.textContent=android?"Open in Chrome":ios?"Open in Safari":"Open in browser";a.href=href();a.rel="noopener external";a.addEventListener("click",function(e){var h=href();a.href=h;if(ig||threads){e.preventDefault();location.href=h}});el.appendChild(label);el.appendChild(a);document.body.appendChild(el)}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",mount);else mount()})();</script><script>(function(){function fix(){var i=document.getElementById("status-splash");if(i&&i.src.indexOf("v=field")<0)i.src="index.png?v=field"}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",fix);else fix()})();</script>
-	</head>
+	<style>
+body { background: #263b20; overscroll-behavior: none; }
+#safe-stage { position: fixed; inset: 0; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); display: flex; align-items: center; justify-content: center; }
+#canvas { touch-action: none; -webkit-user-select: none; user-select: none; }
+#rotate-hint { display: none; position: fixed; inset: 0; z-index: 10000; background: #263b20; color: #fff4d6; align-items: center; justify-content: center; text-align: center; padding: 32px; font: 24px/1.5 sans-serif; }
+@media (orientation: portrait) { #rotate-hint { display: flex; } }
+</style>
+</head>
 	<body>
-		<canvas id="canvas">
+		<div id="safe-stage"><canvas id="canvas">
 			Your browser does not support the canvas tag.
-		</canvas>
+		</canvas></div>
+<div id="rotate-hint" role="status">Play in landscape<br>Turn your phone sideways<br>or widen this window.</div>
 
 		<noscript>
 			Your browser does not support JavaScript.
@@ -112,9 +120,35 @@ body {
 
 		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":2,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":3727804,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4,"serviceWorker":"index.service.worker.js"};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":0,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":3747224,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4,"serviceWorker":"index.service.worker.js"};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
+	// Own the canvas size so browser chrome and notches cannot cover the controls.
+	const gameCanvas = document.getElementById('canvas');
+	const stage = document.getElementById('safe-stage');
+	const portrait = matchMedia('(orientation: portrait)');
+	let blurred = false;
+	function syncStage() {
+		const box = stage.getBoundingClientRect(), css = getComputedStyle(stage);
+		const width = box.width - parseFloat(css.paddingLeft) - parseFloat(css.paddingRight);
+		const height = box.height - parseFloat(css.paddingTop) - parseFloat(css.paddingBottom);
+		const scale = Math.min(width / 1280, height / 720);
+		gameCanvas.style.width = Math.floor(1280 * scale) + 'px';
+		gameCanvas.style.height = Math.floor(720 * scale) + 'px';
+		const dpr = Math.min(window.devicePixelRatio || 1, 2);
+		const renderWidth = Math.max(1, Math.round(1280 * scale * dpr));
+		const renderHeight = Math.max(1, Math.round(720 * scale * dpr));
+		if (gameCanvas.width !== renderWidth) gameCanvas.width = renderWidth;
+		if (gameCanvas.height !== renderHeight) gameCanvas.height = renderHeight;
+		window.sheepdogSuspended = document.hidden || blurred || portrait.matches;
+	}
+	window.addEventListener('resize', syncStage);
+	window.visualViewport?.addEventListener('resize', syncStage);
+	document.addEventListener('visibilitychange', syncStage);
+	window.addEventListener('blur', () => { blurred = true; syncStage(); });
+	window.addEventListener('focus', () => { blurred = false; syncStage(); });
+	portrait.addEventListener('change', syncStage);
+	syncStage();
 
 (function () {
 	const statusOverlay = document.getElementById('status');
@@ -212,6 +246,7 @@ const engine = new Engine(GODOT_CONFIG);
 			},
 		}).then(() => {
 			setStatusMode('hidden');
+			syncStage();
 		}, displayFailureNotice);
 	}
 }());
