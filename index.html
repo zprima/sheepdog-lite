@@ -93,20 +93,102 @@ body {
 		<link id="-gd-engine-icon" rel="icon" type="image/png" href="index.icon.png" />
 <link rel="apple-touch-icon" href="index.apple-touch-icon.png"/>
 <link rel="manifest" href="index.manifest.json">
-<style>@font-face{font-family:Pixelify;src:url("PixelifySans-Regular.ttf") format("truetype");font-display:swap}#status{visibility:visible!important;z-index:5}#status::after{content:"Sheepdog Lite";position:absolute;top:9%;left:0;width:100%;text-align:center;z-index:2;pointer-events:none;font-family:Pixelify,sans-serif;font-size:clamp(2rem,6.5vw,3.6rem);color:#f4e6c3;text-shadow:3px 3px 0 #3a2614,-1px -1px 0 #3a2614,1px -1px 0 #3a2614,-1px 1px 0 #3a2614,1px 1px 0 #3a2614}#status-splash{image-rendering:pixelated}#status-progress::-webkit-progress-bar{background:rgba(20,32,16,.45)}#status-progress::-webkit-progress-value{background:#f4e6c3}#status-progress::-moz-progress-bar{background:#f4e6c3}</style><meta name="mobile-web-app-capable" content="yes" /><meta name="apple-mobile-web-app-capable" content="yes" /><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" /><style>#inapp-browser-banner{position:fixed;left:50%;top:max(.65rem,env(safe-area-inset-top));transform:translateX(-50%);z-index:9999;display:flex;align-items:center;gap:.65rem;padding:.5rem .55rem .5rem .8rem;background:rgba(20,32,16,.94);color:#f4e6c3;border:2px solid rgba(244,230,195,.8);border-radius:.65rem;box-shadow:0 3px 12px rgba(0,0,0,.35);font-family:sans-serif;font-size:.88rem;line-height:1.15;white-space:nowrap}#inapp-browser-banner a{display:inline-block;padding:.55rem .75rem;background:#f4e6c3;color:#142010;border-radius:.45rem;font-weight:700;text-decoration:none}</style><script>(function(){var ua=navigator.userAgent||"",android=/Android/i.test(ua),ios=/iPhone|iPad|iPod/i.test(ua),threads=/Barcelona/i.test(ua),ig=/Instagram/i.test(ua)&&!threads,inapp=/Instagram|Barcelona|FBAN|FBAV|FB_IAB|Line|Twitter|Snapchat|Bytedance|musical_ly|TikTok/i.test(ua);if(!inapp)return;function href(){var url=location.href;if(android)return "intent://"+location.host+location.pathname+location.search+location.hash+"#Intent;scheme="+location.protocol.replace(":","")+";package=com.android.chrome;S.browser_fallback_url="+encodeURIComponent(url)+";end";if(threads)return "barcelona://extbrowser/?url="+encodeURIComponent(url);if(ig)return "instagram://extbrowser/?url="+encodeURIComponent(url);if(ios)return url.replace(/^https:/,"x-safari-https:").replace(/^http:/,"x-safari-http:");return url}function mount(){if(document.getElementById("inapp-browser-banner"))return;var el=document.createElement("div");el.id="inapp-browser-banner";var label=document.createElement("span");label.textContent="In-app browser";var a=document.createElement("a");a.textContent=android?"Open in Chrome":ios?"Open in Safari":"Open in browser";a.href=href();a.rel="noopener external";a.addEventListener("click",function(e){var h=href();a.href=h;if(ig||threads){e.preventDefault();location.href=h}});el.appendChild(label);el.appendChild(a);document.body.appendChild(el)}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",mount);else mount()})();</script><script>(function(){function fix(){var i=document.getElementById("status-splash");if(i&&i.src.indexOf("v=field")<0)i.src="index.png?v=field"}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",fix);else fix()})();</script>
+<style>@font-face{font-family:Pixelify;src:url("PixelifySans-Regular.ttf") format("truetype");font-display:swap}#status{visibility:visible!important;z-index:5}#status::after{content:"Sheepdog Lite";position:absolute;top:9%;left:0;width:100%;text-align:center;z-index:2;pointer-events:none;font-family:Pixelify,sans-serif;font-size:clamp(2rem,6.5vw,3.6rem);color:#f4e6c3;text-shadow:3px 3px 0 #3a2614,-1px -1px 0 #3a2614,1px -1px 0 #3a2614,-1px 1px 0 #3a2614,1px 1px 0 #3a2614}#status-splash{image-rendering:pixelated}#status-progress::-webkit-progress-bar{background:rgba(20,32,16,.45)}#status-progress::-webkit-progress-value{background:#f4e6c3}#status-progress::-moz-progress-bar{background:#f4e6c3}</style><meta name="mobile-web-app-capable" content="yes" /><meta name="apple-mobile-web-app-capable" content="yes" /><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" /><script>(function(){function fix(){var i=document.getElementById("status-splash");if(i&&i.src.indexOf("v=field")<0)i.src="index.png?v=field"}if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",fix);else fix()})();</script>
 	<style>
 body { background: #263b20; overscroll-behavior: none; }
-#safe-stage { position: fixed; inset: 0; padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); display: flex; align-items: center; justify-content: center; }
+#safe-stage { position: fixed; inset: 0; padding: max(env(safe-area-inset-top), var(--browser-notice-space, 0px)) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); display: flex; align-items: center; justify-content: center; }
 #canvas { touch-action: none; -webkit-user-select: none; user-select: none; }
-#rotate-hint { display: none; position: fixed; inset: 0; z-index: 10000; background: #263b20; color: #fff4d6; align-items: center; justify-content: center; text-align: center; padding: 32px; font: 24px/1.5 sans-serif; }
-@media (orientation: portrait) { #rotate-hint { display: flex; } }
 </style>
+<style>
+#inapp-browser-banner {
+ position: fixed; top: max(8px, env(safe-area-inset-top));
+ left: max(8px, env(safe-area-inset-left)); right: max(8px, env(safe-area-inset-right));
+ z-index: 9999; max-width: 680px; margin: 0 auto; box-sizing: border-box;
+ padding: 10px 12px; border: 1px solid #a8b98b; border-radius: 12px;
+ background: #20331ef5; color: #fff4d6; font: 14px/1.4 sans-serif;
+ display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 12px;
+}
+#inapp-browser-banner p { margin: 0; flex: 1 1 150px; }
+#inapp-browser-banner .actions { display: flex; gap: 8px; }
+#inapp-browser-banner a, #inapp-browser-banner button {
+ display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;
+ min-height: 44px; padding: 9px 12px; border: 1px solid #c8c8a0; border-radius: 8px;
+ font: 600 14px sans-serif; text-decoration: none; cursor: pointer;
+}
+#inapp-browser-banner a { background: #fff4d6; color: #20331e; }
+#inapp-browser-banner button { background: transparent; color: #fff4d6; }
+#inapp-browser-banner .fallback { flex-basis: 100%; font-size: 13px; }
+</style>
+<script id="inapp-browser-choice">
+(function () {
+ const ua = navigator.userAgent || '';
+ const android = /Android/i.test(ua), ios = /iPhone|iPad|iPod/i.test(ua);
+ const threads = /Barcelona/i.test(ua), instagram = /Instagram/i.test(ua) && !threads;
+ const inapp = /Instagram|Barcelona|FBAN|FBAV|FB_IAB|Line\/|Twitter|Snapchat|Bytedance|musical_ly|TikTok/i.test(ua);
+ if (!inapp) return;
+ function browserHref() {
+  const url = location.href;
+  if (android) return 'intent://' + location.host + location.pathname + location.search + location.hash +
+   '#Intent;scheme=' + location.protocol.replace(':', '') + ';package=com.android.chrome;S.browser_fallback_url=' + encodeURIComponent(url) + ';end';
+  if (threads) return 'barcelona://extbrowser/?url=' + encodeURIComponent(url);
+  if (instagram) return 'instagram://extbrowser/?url=' + encodeURIComponent(url);
+  if (ios) return url.replace(/^https:/, 'x-safari-https:').replace(/^http:/, 'x-safari-http:');
+  return url;
+ }
+ function mount() {
+  if (document.getElementById('inapp-browser-banner')) return;
+  const banner = document.createElement('aside');
+  banner.id = 'inapp-browser-banner';
+  banner.setAttribute('aria-label', 'Browser choice');
+  const copy = document.createElement('p');
+  copy.textContent = instagram ? 'Opened in Instagram. Choose where to play.' : 'Opened in an in-app browser. Choose where to play.';
+  const actions = document.createElement('div');
+  actions.className = 'actions';
+  const open = document.createElement('a');
+  open.textContent = 'Open in browser';
+  open.href = browserHref();
+  open.rel = 'noopener external';
+  const fallback = document.createElement('p');
+  fallback.className = 'fallback';
+  fallback.hidden = true;
+  fallback.textContent = 'If nothing opens, use the app’s menu (⋯) and choose “Open in browser”, or keep playing here.';
+  open.addEventListener('click', function () {
+   // External-app navigation happens only from this explicit user tap.
+   open.href = browserHref();
+   fallback.hidden = false;
+   requestAnimationFrame(reserveSpace);
+  });
+  const stay = document.createElement('button');
+  stay.type = 'button';
+  stay.textContent = 'Play here';
+  function reserveSpace() {
+   document.documentElement.style.setProperty('--browser-notice-space', (banner.getBoundingClientRect().bottom + 8) + 'px');
+   window.dispatchEvent(new Event('resize'));
+  }
+  const observer = new ResizeObserver(reserveSpace);
+  stay.addEventListener('click', function () {
+   observer.disconnect();
+   banner.remove();
+   document.documentElement.style.removeProperty('--browser-notice-space');
+   window.dispatchEvent(new Event('resize'));
+   document.getElementById('canvas')?.focus();
+  });
+  actions.append(open, stay);
+  banner.append(copy, actions, fallback);
+  document.body.appendChild(banner);
+  observer.observe(banner);
+  reserveSpace();
+ }
+ if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', mount);
+ else mount();
+}());
+</script>
+
 </head>
 	<body>
 		<div id="safe-stage"><canvas id="canvas">
 			Your browser does not support the canvas tag.
 		</canvas></div>
-<div id="rotate-hint" role="status">Play in landscape<br>Turn your phone sideways<br>or widen this window.</div>
 
 		<noscript>
 			Your browser does not support JavaScript.
@@ -126,7 +208,6 @@ const engine = new Engine(GODOT_CONFIG);
 	// Own the canvas size so browser chrome and notches cannot cover the controls.
 	const gameCanvas = document.getElementById('canvas');
 	const stage = document.getElementById('safe-stage');
-	const portrait = matchMedia('(orientation: portrait)');
 	let blurred = false;
 	function syncStage() {
 		const box = stage.getBoundingClientRect(), css = getComputedStyle(stage);
@@ -140,14 +221,13 @@ const engine = new Engine(GODOT_CONFIG);
 		const renderHeight = Math.max(1, Math.round(720 * scale * dpr));
 		if (gameCanvas.width !== renderWidth) gameCanvas.width = renderWidth;
 		if (gameCanvas.height !== renderHeight) gameCanvas.height = renderHeight;
-		window.sheepdogSuspended = document.hidden || blurred || portrait.matches;
+		window.sheepdogSuspended = document.hidden || blurred;
 	}
 	window.addEventListener('resize', syncStage);
 	window.visualViewport?.addEventListener('resize', syncStage);
 	document.addEventListener('visibilitychange', syncStage);
 	window.addEventListener('blur', () => { blurred = true; syncStage(); });
 	window.addEventListener('focus', () => { blurred = false; syncStage(); });
-	portrait.addEventListener('change', syncStage);
 	syncStage();
 
 (function () {
