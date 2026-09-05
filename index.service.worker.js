@@ -4,10 +4,12 @@
 // Incrementing CACHE_VERSION will kick off the install event and force
 // previously cached resources to be updated from the network.
 /** @type {string} */
-const CACHE_VERSION = '1788623513|1027708';
+const CACHE_VERSION = '1788624050|1040575';
 /** @type {string} */
 const CACHE_PREFIX = 'sheepdog-lite-sw-cache-';
-const CACHE_NAME = CACHE_PREFIX + CACHE_VERSION;
+// Sheepdog web update policy v2
+const CACHE_NAME = CACHE_PREFIX + 'web2-' + CACHE_VERSION;
+let migrateLegacyClients = false;
 /** @type {string} */
 const OFFLINE_URL = 'index.offline.html';
 /** @type {boolean} */
@@ -21,18 +23,31 @@ const CACHEABLE_FILES = ["index.wasm","index.pck"];
 const FULL_CACHE = CACHED_FILES.concat(CACHEABLE_FILES);
 
 self.addEventListener('install', (event) => {
-	event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(CACHED_FILES)));
+	event.waitUntil(caches.open(CACHE_NAME).then((cache) => cache.addAll(CACHED_FILES.map((file) => new Request(file, { cache: 'reload' })))).then(() => self.skipWaiting()));
 });
 
 self.addEventListener('activate', (event) => {
 	event.waitUntil(caches.keys().then(
 		function (keys) {
-			// Remove old caches.
+			// Migrate once from the old cache-first worker, including already-open blocked pages.
+			migrateLegacyClients = keys.some((key) => key.startsWith(CACHE_PREFIX) && !key.startsWith(CACHE_PREFIX + 'web2-'));
+			// Remove only this game's obsolete caches.
 			return Promise.all(keys.filter((key) => key.startsWith(CACHE_PREFIX) && key !== CACHE_NAME).map((key) => caches.delete(key)));
 		}
 	).then(function () {
 		// Enable navigation preload if available.
-		return ('navigationPreload' in self.registration) ? self.registration.navigationPreload.enable() : Promise.resolve();
+		return ('navigationPreload' in self.registration) ? self.registration.navigationPreload.disable() : Promise.resolve();
+	}).then(async () => {
+		await self.clients.claim();
+		if (migrateLegacyClients) {
+			const windows = await self.clients.matchAll({ type: 'window' });
+			await Promise.all(windows.map((client) => {
+				const url = new URL(client.url);
+				if (!url.href.startsWith(self.registration.scope)) return;
+				url.searchParams.set('fresh', CACHE_VERSION);
+				return client.navigate(url.href).catch(() => null);
+			}));
+		}
 	}));
 });
 
@@ -69,10 +84,10 @@ function ensureCrossOriginIsolationHeaders(response) {
 async function fetchAndCache(event, cache, isCacheable) {
 	// Use the preloaded response, if it's there
 	/** @type { Response } */
-	let response = await event.preloadResponse;
+	let response = null; // Revalidate explicitly; navigation preload may reuse stale HTTP cache.
 	if (response == null) {
 		// Or, go over network.
-		response = await self.fetch(event.request);
+		response = await self.fetch(new Request(event.request, { cache: 'no-cache' }));
 	}
 
 	if (ENSURE_CROSSORIGIN_ISOLATION_HEADERS) {
@@ -81,7 +96,7 @@ async function fetchAndCache(event, cache, isCacheable) {
 
 	if (isCacheable) {
 		// And update the cache
-		cache.put(event.request, response.clone());
+		if (response.ok) await cache.put(event.request, response.clone());
 	}
 
 	return response;
@@ -99,11 +114,23 @@ self.addEventListener(
 		const referrer = event.request.referrer || '';
 		const base = referrer.slice(0, referrer.lastIndexOf('/') + 1);
 		const local = url.startsWith(base) ? url.replace(base, '') : '';
+		const isPackage = new URL(url).pathname.endsWith('/index.pck');
 		const isCacheable = FULL_CACHE.some((v) => v === local) || (base === referrer && base.endsWith(CACHED_FILES[0]));
-		if (isNavigate || isCacheable) {
+		if (isNavigate || isCacheable || isPackage) {
 			event.respondWith((async () => {
 				// Try to use cache first
 				const cache = await caches.open(CACHE_NAME);
+				// Online visits must revalidate the HTML and versioned game package.
+				if (isNavigate || isPackage) {
+					try {
+						const response = await fetchAndCache(event, cache, true);
+						if (response.ok) return response;
+					} catch (_) { /* Retain offline play from the current release cache. */ }
+					const saved = await cache.match(event.request, { ignoreSearch: true });
+					if (saved) return saved;
+					if (isNavigate) return await cache.match('index.html') || await cache.match(OFFLINE_URL);
+					return Response.error();
+				}
 				if (isNavigate) {
 					// Check if we have full cache during HTML page request.
 					/** @type {Response[]} */

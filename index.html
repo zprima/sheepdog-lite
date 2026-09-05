@@ -119,6 +119,14 @@ body { background: #263b20; overscroll-behavior: none; }
 #inapp-browser-banner button { background: transparent; color: #fff4d6; }
 #inapp-browser-banner .fallback { flex-basis: 100%; font-size: 13px; }
 </style>
+<script id="web-update-check">
+// Check even before the engine starts, so an old cached entry page can recover.
+if ('serviceWorker' in navigator) {
+ navigator.serviceWorker.register('./index.service.worker.js', { updateViaCache: 'none' })
+  .then((registration) => registration.update())
+  .catch((error) => console.warn('Game update check unavailable:', error));
+}
+</script>
 <script id="inapp-browser-choice">
 (function () {
  const ua = navigator.userAgent || '';
