@@ -98,6 +98,14 @@ body {
 body { background: #263b20; overscroll-behavior: none; }
 #safe-stage { position: fixed; inset: 0; padding: max(env(safe-area-inset-top), var(--browser-notice-space, 0px)) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left); display: flex; align-items: center; justify-content: center; }
 #canvas { touch-action: none; -webkit-user-select: none; user-select: none; }
+#rotate-tip {
+ position: fixed; left: 0; right: 0; z-index: 6; pointer-events: none;
+ text-align: center; color: #fff4d6cc; font: 600 14px/1.35 sans-serif;
+ text-shadow: 0 1px 2px #132014aa; letter-spacing: 0.02em;
+ padding: 0 16px; opacity: 0; transition: opacity 160ms ease;
+}
+#rotate-tip[data-show="1"] { opacity: 1; }
+#rotate-tip .glyph { display: inline-block; margin-right: 6px; font-weight: 700; }
 </style>
 <style>
 #inapp-browser-banner {
@@ -109,11 +117,12 @@ body { background: #263b20; overscroll-behavior: none; }
  display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 8px 12px;
 }
 #inapp-browser-banner p { margin: 0; flex: 1 1 150px; }
-#inapp-browser-banner .actions { display: flex; gap: 8px; }
+#inapp-browser-banner .actions { display: flex; gap: 8px; flex-wrap: wrap; }
 #inapp-browser-banner a, #inapp-browser-banner button {
  display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box;
- min-height: 44px; padding: 9px 12px; border: 1px solid #c8c8a0; border-radius: 8px;
+ min-height: 48px; min-width: 44px; padding: 12px 16px; border: 1px solid #c8c8a0; border-radius: 8px;
  font: 600 14px sans-serif; text-decoration: none; cursor: pointer;
+ -webkit-tap-highlight-color: transparent;
 }
 #inapp-browser-banner a { background: #fff4d6; color: #20331e; }
 #inapp-browser-banner button { background: transparent; color: #fff4d6; }
@@ -133,6 +142,8 @@ if ('serviceWorker' in navigator) {
  const android = /Android/i.test(ua), ios = /iPhone|iPad|iPod/i.test(ua);
  const threads = /Barcelona/i.test(ua), instagram = /Instagram/i.test(ua) && !threads;
  const inapp = /Instagram|Barcelona|FBAN|FBAV|FB_IAB|Line\/|Twitter|Snapchat|Bytedance|musical_ly|TikTok/i.test(ua);
+ // Rotation does not work in Instagram/etc. in-app browsers — never nudge rotate there.
+ window.sheepdogInAppBrowser = inapp;
  if (!inapp) return;
  function browserHref() {
   const url = location.href;
@@ -194,7 +205,9 @@ if ('serviceWorker' in navigator) {
 
 </head>
 	<body>
-		<div id="safe-stage"><canvas id="canvas">
+		<div id="safe-stage">
+			<div id="rotate-tip" role="note" aria-hidden="true"><span class="glyph" aria-hidden="true">↻</span>Rotate your phone for a wider view</div>
+			<canvas id="canvas">
 			Your browser does not support the canvas tag.
 		</canvas></div>
 
@@ -210,29 +223,61 @@ if ('serviceWorker' in navigator) {
 
 		<script src="index.js"></script>
 		<script>
-const GODOT_CONFIG = {"args":[],"canvasResizePolicy":0,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":3747224,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4,"serviceWorker":"index.service.worker.js"};
+const GODOT_CONFIG = {"args":[],"canvasResizePolicy":0,"emscriptenPoolSize":8,"ensureCrossOriginIsolationHeaders":false,"executable":"index","experimentalVK":false,"fileSizes":{"index.pck":3749720,"index.wasm":39514754},"focusCanvas":true,"gdextensionLibs":[],"godotPoolSize":4,"serviceWorker":"index.service.worker.js"};
 const GODOT_THREADS_ENABLED = false;
 const engine = new Engine(GODOT_CONFIG);
 	// Own the canvas size so browser chrome and notches cannot cover the controls.
 	const gameCanvas = document.getElementById('canvas');
 	const stage = document.getElementById('safe-stage');
+	const rotateTip = document.getElementById('rotate-tip');
 	let blurred = false;
+	function isPortrait() {
+		try { if (window.matchMedia('(orientation: portrait)').matches) return true; } catch (e) {}
+		const vv = window.visualViewport;
+		const w = vv ? vv.width : window.innerWidth;
+		const h = vv ? vv.height : window.innerHeight;
+		return h > w;
+	}
+	function syncRotateTip(letterboxed) {
+		if (!rotateTip) return;
+		// Never show rotate tip in Instagram/Threads/FB/etc. — rotation is broken there.
+		const show = letterboxed && isPortrait() && !window.sheepdogInAppBrowser;
+		rotateTip.dataset.show = show ? '1' : '0';
+		rotateTip.setAttribute('aria-hidden', show ? 'false' : 'true');
+		if (!show) return;
+		const box = stage.getBoundingClientRect();
+		const canvasBox = gameCanvas.getBoundingClientRect();
+		const topGap = Math.max(0, canvasBox.top - box.top);
+		const bottomGap = Math.max(0, box.bottom - canvasBox.bottom);
+		if (topGap >= bottomGap) {
+			rotateTip.style.top = Math.max(10, box.top + Math.max(8, topGap * 0.28)) + 'px';
+			rotateTip.style.bottom = 'auto';
+		} else {
+			rotateTip.style.bottom = Math.max(10, (window.innerHeight - box.bottom) + Math.max(8, bottomGap * 0.28)) + 'px';
+			rotateTip.style.top = 'auto';
+		}
+	}
 	function syncStage() {
 		const box = stage.getBoundingClientRect(), css = getComputedStyle(stage);
-		const width = box.width - parseFloat(css.paddingLeft) - parseFloat(css.paddingRight);
-		const height = box.height - parseFloat(css.paddingTop) - parseFloat(css.paddingBottom);
-		const scale = Math.min(width / 1280, height / 720);
-		gameCanvas.style.width = Math.floor(1280 * scale) + 'px';
-		gameCanvas.style.height = Math.floor(720 * scale) + 'px';
+		const width = Math.max(1, box.width - parseFloat(css.paddingLeft) - parseFloat(css.paddingRight));
+		const height = Math.max(1, box.height - parseFloat(css.paddingTop) - parseFloat(css.paddingBottom));
 		const dpr = Math.min(window.devicePixelRatio || 1, 2);
+		// Keep a fixed 1280×720 landscape stage letterboxed in portrait.
+		const scale = Math.min(width / 1280, height / 720);
+		const cssW = Math.floor(1280 * scale);
+		const cssH = Math.floor(720 * scale);
 		const renderWidth = Math.max(1, Math.round(1280 * scale * dpr));
 		const renderHeight = Math.max(1, Math.round(720 * scale * dpr));
+		gameCanvas.style.width = cssW + 'px';
+		gameCanvas.style.height = cssH + 'px';
 		if (gameCanvas.width !== renderWidth) gameCanvas.width = renderWidth;
 		if (gameCanvas.height !== renderHeight) gameCanvas.height = renderHeight;
 		window.sheepdogSuspended = document.hidden || blurred;
+		syncRotateTip(true);
 	}
 	window.addEventListener('resize', syncStage);
 	window.visualViewport?.addEventListener('resize', syncStage);
+	try { window.matchMedia('(orientation: portrait)').addEventListener('change', syncStage); } catch (e) {}
 	document.addEventListener('visibilitychange', syncStage);
 	window.addEventListener('blur', () => { blurred = true; syncStage(); });
 	window.addEventListener('focus', () => { blurred = false; syncStage(); });
