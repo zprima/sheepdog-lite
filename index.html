@@ -160,7 +160,7 @@ if ('serviceWorker' in navigator) {
   banner.id = 'inapp-browser-banner';
   banner.setAttribute('aria-label', 'Browser choice');
   const copy = document.createElement('p');
-  copy.textContent = instagram ? 'Opened in Instagram. These don't detect phone orientation. Recommended to play in browser. Choose where to play.' : 'Opened in an in-app browser. These don't detect phone orientation. Recommended to play in browser. Choose where to play.';
+  copy.textContent = instagram ? "Opened in Instagram. These don't detect phone orientation. Recommended to play in browser. Choose where to play." : "Opened in an in-app browser. These don't detect phone orientation. Recommended to play in browser. Choose where to play.";
   const actions = document.createElement('div');
   actions.className = 'actions';
   const open = document.createElement('a');
@@ -241,7 +241,8 @@ const engine = new Engine(GODOT_CONFIG);
 	function syncRotateTip(letterboxed) {
 		if (!rotateTip) return;
 		// Never show rotate tip in Instagram/Threads/FB/etc. — rotation is broken there.
-		const show = letterboxed && isPortrait() && !window.sheepdogInAppBrowser;
+		const inApp = !!(window.sheepdogInAppBrowser) || /Instagram|Barcelona|FBAN|FBAV|FB_IAB|Line\/|Twitter|Snapchat|Bytedance|musical_ly|TikTok/i.test(navigator.userAgent || '');
+		const show = letterboxed && isPortrait() && !inApp;
 		rotateTip.dataset.show = show ? '1' : '0';
 		rotateTip.setAttribute('aria-hidden', show ? 'false' : 'true');
 		if (!show) return;
